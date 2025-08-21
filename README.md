@@ -1,7 +1,3 @@
-Absolutely! Here’s a **drop-in README** with some tasteful emojis sprinkled in—keeping all your content intact while making it a bit more fun and scannable.
-
----
-
 # 🛗 Elevator Tracker
 
 Fast, tap-friendly **FastAPI + HTMX** web app to log which **elevator (A–F by default)** was used between floors **(0–22 by default)**—designed for phone and quick one-tap entry.
