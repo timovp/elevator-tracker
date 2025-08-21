@@ -104,7 +104,7 @@ $env:DATABASE_URL = "sqlite:///elevators.db"
 uv run uvicorn main:app --reload --port 1992
 ```
 
-Open: [http://127.0.0.1:1992](http://127.0.0.1:1992)
+Open: [http://localhost:1992](http://localhost:1992)
 
 That’s it—uv handles the venv automatically (no manual activation needed).
 
