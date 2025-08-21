@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>{{ title if title else "Elevator Tracker" }}</title>
+
+	<!-- Tailwind CDN -->
+	<script src="https://cdn.tailwindcss.com"></script>
+	<!-- HTMX -->
+	<script src="https://unpkg.com/htmx.org@2.0.2"></script>
+
+	<style>
+		:root {
+			--tap: 56px;
+		}
+
+		.btn {
+			border-radius: 0.75rem;
+			font-weight: 600;
+			padding: 0.75rem 1rem;
+			min-height: var(--tap);
+		}
+
+		.chip {
+			padding: 0.25rem 0.6rem;
+			border-radius: 999px;
+			font-size: 0.8rem;
+		}
+	</style>
+</head>
+
+<body class="bg-white text-gray-900">
+	<header class="sticky top-0 z-10 backdrop-blur bg-white/80 border-b">
+		<div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
+			<div class="text-xl font-semibold">⬆️ Elevator Tracker</div>
+			<div class="ml-auto flex items-center gap-2">
+				<a href="/" class="chip bg-gray-100">Today</a>
+				<form method="get" action="/export.csv">
+					<input type="hidden" name="day" value="{{ target_day.isoformat() }}">
+					<button class="chip bg-gray-100" type="submit">Export CSV</button>
+				</form>
+			</div>
+		</div>
+	</header>
+
+	<main class="max-w-5xl mx-auto px-4 py-6">
+		{% block content %}{% endblock %}
+	</main>
+
+	<!-- Keypad Modal + Script -->
+	<div id="keypad-overlay" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-black/40">
+		<div class="w-full sm:max-w-sm bg-white rounded-t-2xl sm:rounded-2xl shadow-lg overflow-hidden"
+			role="dialog" aria-modal="true" aria-labelledby="kp-title">
+			<div class="px-4 py-3 border-b">
+				<div id="kp-title" class="font-semibold">Enter value</div>
+				<div id="kp-sub" class="text-xs text-gray-500 mt-1">Allowed: <span id="kp-range"></span>
+				</div>
+			</div>
+
+			<div class="px-4 pt-4">
+				<div class="rounded-xl border px-4 py-3 text-2xl font-mono text-center select-none"
+					id="kp-display">—</div>
+			</div>
+
+			<div class="p-4 grid grid-cols-3 gap-2 select-none">
+				<button class="rounded-xl border py-4 text-xl" data-kp="1">1</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="2">2</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="3">3</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="4">4</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="5">5</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="6">6</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="7">7</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="8">8</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="9">9</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="C">C</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="0">0</button>
+				<button class="rounded-xl border py-4 text-xl" data-kp="B">⌫</button>
+			</div>
+
+			<div class="px-4 pb-2 text-sm text-gray-600">Quick pick</div>
+			<div class="px-4 pb-2 max-h-36 overflow-auto">
+				<div id="kp-quick" class="grid grid-cols-6 gap-2"></div>
+			</div>
+
+			<div class="p-4 flex gap-2 border-t">
+				<button id="kp-cancel" class="btn bg-gray-100 flex-1">Cancel</button>
+				<button id="kp-ok" class="btn bg-gray-900 text-white flex-1" disabled>OK</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			const overlay = document.getElementById('keypad-overlay');
+			const display = document.getElementById('kp-display');
+			const titleEl = document.getElementById('kp-title');
+			const rangeEl = document.getElementById('kp-range');
+			const quick = document.getElementById('kp-quick');
+			const okBtn = document.getElementById('kp-ok');
+			const cancelBtn = document.getElementById('kp-cancel');
+
+			let target = null;
+			let min = 0, max = 22;  // <-- defaults; real limits come from data-min/data-max
+			let value = "";
+
+			function clampAndValidate() {
+				const n = Number(value);
+				const valid = value !== "" && Number.isInteger(n) && n >= min && n <= max;
+				display.textContent = value === "" ? "—" : value;
+				okBtn.disabled = !valid;
+			}
+
+			function openKeypad(input) {
+				target = input;
+				min = Number(input.dataset.min ?? min);
+				max = Number(input.dataset.max ?? max);
+				value = (input.value || "").replace(/\D/g, "");
+				titleEl.textContent = input.dataset.label || "Enter value";
+				rangeEl.textContent = `${min} – ${max}`;
+				buildQuick(min, max);
+				clampAndValidate();
+				overlay.classList.remove('hidden');
+				overlay.classList.add('flex');
+			}
+
+			function closeKeypad() {
+				overlay.classList.add('hidden');
+				overlay.classList.remove('flex');
+				target = null;
+				value = "";
+			}
+
+			function buildQuick(a, b) {
+				quick.innerHTML = "";
+				const frag = document.createDocumentFragment();
+				for (let i = a; i <= b; i++) {
+					const btn = document.createElement('button');
+					btn.type = "button";
+					btn.className = "rounded-xl border px-3 py-2 text-sm";
+					btn.textContent = i;
+					btn.addEventListener('click', () => {
+						value = String(i);
+						clampAndValidate();
+					});
+					frag.appendChild(btn);
+				}
+				quick.appendChild(frag);
+			}
+
+			overlay.addEventListener('click', (e) => {
+				const key = e.target.getAttribute('data-kp');
+				if (!key) return;
+
+				if (key === 'C') value = "";
+				else if (key === 'B') value = value.slice(0, -1);
+				else {
+					const next = (value + key).replace(/^0+/, '0');
+					value = next === "0" ? "0" : next;
+				}
+				clampAndValidate();
+			});
+
+			okBtn.addEventListener('click', () => {
+				if (!target) return;
+				const n = Number(value);
+				if (Number.isInteger(n) && n >= min && n <= max) {
+					target.value = String(n);
+					target.dispatchEvent(new Event('change', {bubbles: true}));
+					closeKeypad();
+				}
+			});
+			cancelBtn.addEventListener('click', closeKeypad);
+			overlay.addEventListener('click', (e) => {if (e.target === overlay) closeKeypad();});
+
+			document.addEventListener('click', (e) => {
+				const input = e.target.closest('[data-keypad]');
+				if (!input) return;
+				e.preventDefault();
+				openKeypad(input);
+			});
+
+			document.addEventListener('keydown', (e) => {
+				if (overlay.classList.contains('hidden')) return;
+				if (e.key === 'Enter') {e.preventDefault(); okBtn.click();}
+				if (e.key === 'Escape') {e.preventDefault(); cancelBtn.click();}
+			});
+		})();
+	</script>
+</body>
+
+</html>

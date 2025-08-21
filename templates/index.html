@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="mb-4 text-sm text-gray-600">
+  <span class="chip bg-gray-100">Day: {{ target_day.strftime("%A, %d %B %Y") }}</span>
+</div>
+
+<!-- Quick entry form: keypad fields + elevator buttons -->
+<div class="rounded-2xl border p-4 mb-6">
+  <form id="entry" hx-post="/log" hx-target="this" hx-swap="none" class="grid sm:grid-cols-3 gap-3 items-end">
+    <div>
+      <label class="block text-sm mb-1">From floor</label>
+      <input
+        id="from_floor"
+        name="from_floor"
+        type="text"
+        readonly
+        inputmode="none"
+        class="w-full rounded-xl border px-4 py-3 cursor-pointer"
+        placeholder="Tap to set {{ min_floor }}–{{ max_floor }}"
+        data-keypad
+        data-min="{{ min_floor }}"
+        data-max="{{ max_floor }}"
+        data-label="From floor"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm mb-1">To floor</label>
+      <input
+        id="to_floor"
+        name="to_floor"
+        type="text"
+        readonly
+        inputmode="none"
+        class="w-full rounded-xl border px-4 py-3 cursor-pointer"
+        placeholder="Tap to set {{ min_floor }}–{{ max_floor }}"
+        data-keypad
+        data-min="{{ min_floor }}"
+        data-max="{{ max_floor }}"
+        data-label="To floor"
+        required
+      />
+    </div>
+
+    <input type="hidden" name="day" value="{{ target_day.isoformat() }}">
+
+    <div class="sm:col-span-3">
+      <div class="text-sm text-gray-600 mb-1">Choose elevator</div>
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        {% for e in elevators %}
+          <button
+            class="btn bg-gray-900 text-white"
+            name="elevator" value="{{ e }}"
+            hx-post="/log"
+            hx-include="#entry [name=from_floor], #entry [name=to_floor], #entry [name=day], this"
+            hx-target="#recent"
+            hx-swap="outerHTML"
+          >
+            {{ e }}
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+  </form>
+  <div id="error" class="text-red-600 text-sm mt-2"></div>
+</div>
+
+<div class="grid gap-6 md:grid-cols-3">
+  <div class="md:col-span-2 rounded-2xl border overflow-hidden">
+    <div class="p-3 border-b font-semibold">Recent (last 20)</div>
+    <div id="recent">
+      {% include "_recent.html" %}
+    </div>
+  </div>
+
+  <div class="rounded-2xl border overflow-hidden">
+    <div class="p-3 border-b font-semibold">Stats</div>
+    <div id="stats" class="p-3">
+      {% include "_stats.html" %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

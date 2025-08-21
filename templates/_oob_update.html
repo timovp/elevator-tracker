@@ -1,0 +1,14 @@
+<!-- recent -->
+<div id="recent" hx-swap-oob="outerHTML">
+	{% include "_recent.html" %}
+</div>
+
+<!-- stats -->
+<div id="stats" class="p-3" hx-swap-oob="outerHTML">
+	{% include "_stats.html" %}
+</div>
+
+<!-- error area -->
+<div id="error" hx-swap-oob="innerHTML">
+	{% if error %}<div class="text-red-600 text-sm">{{ error }}</div>{% else %}{% endif %}
+</div>

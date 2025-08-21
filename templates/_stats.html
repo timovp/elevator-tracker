@@ -1,0 +1,60 @@
+<div class="space-y-6">
+	<!-- Totals by elevator (cards) -->
+	<div>
+		<div class="text-sm text-gray-600 mb-1">Totals by elevator</div>
+		<div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+			{% for e in elevators %}
+			<div class="rounded-xl border p-3 text-center">
+				<div class="text-xs text-gray-500 mb-1">{{ e }}</div>
+				<div class="text-lg font-semibold">{{ stats.totals.get(e, 0) }}</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+
+	<!-- Most-used elevators (ranked list) -->
+	<div>
+		<div class="text-sm text-gray-600 mb-1">Most used elevators</div>
+		<ol class="space-y-1 list-decimal list-inside">
+			{% for item in stats.top_elevators %}
+			<li class="flex justify-between">
+				<span>Elevator <strong>{{ item.elevator }}</strong></span>
+				<span class="font-semibold">{{ item.count }}</span>
+			</li>
+			{% else %}
+			<li class="text-gray-500">No usage yet.</li>
+			{% endfor %}
+		</ol>
+	</div>
+
+	<!-- Top routes + elevator distribution -->
+	<div>
+		<div class="text-sm text-gray-600 mb-1">Top routes</div>
+		<ul class="space-y-2">
+			{% for r in stats.top_routes %}
+			<li class="rounded-xl border p-3">
+				<div class="flex justify-between items-baseline">
+					<div class="font-medium">{{ r.route }}</div>
+					<div class="text-sm text-gray-600">Total: <span class="font-semibold">{{ r.count
+							}}</span></div>
+				</div>
+
+				{% if r.elevators %}
+				<div class="mt-2 text-sm text-gray-600">By elevator</div>
+				<div class="mt-1 flex flex-wrap gap-2">
+					{% for e in r.elevators %}
+					<span class="chip bg-gray-100">
+						{{ e.elevator }} — {{ e.count }} ({{ '%.0f'|format(e.pct) }}%)
+					</span>
+					{% endfor %}
+				</div>
+				{% else %}
+				<div class="text-gray-500 text-sm mt-1">No data.</div>
+				{% endif %}
+			</li>
+			{% else %}
+			<li class="text-gray-500">No routes yet.</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>

@@ -1,0 +1,30 @@
+<table class="min-w-full text-sm">
+	<thead class="bg-gray-50">
+		<tr>
+			<th class="text-left px-3 py-2">Time</th>
+			<th class="text-left px-3 py-2">Elevator</th>
+			<th class="text-left px-3 py-2">From → To</th>
+			<th class="px-3 py-2"></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for r in recent %}
+		<tr class="border-t">
+			<td class="px-3 py-2">{{ r.ts.strftime("%H:%M:%S") }}</td>
+			<td class="px-3 py-2 font-semibold">{{ r.elevator }}</td>
+			<td class="px-3 py-2">{{ r.from_floor }} → {{ r.to_floor }}</td>
+			<td class="px-3 py-2 text-right">
+				<form hx-post="/usage/{{ r.id }}/delete" hx-target="#recent" hx-swap="outerHTML"
+					class="inline">
+					<input type="hidden" name="day" value="{{ r.day.isoformat() }}">
+					<button class="chip bg-red-50 text-red-700" type="submit">Undo</button>
+				</form>
+			</td>
+		</tr>
+		{% else %}
+		<tr>
+			<td class="px-3 py-3 text-gray-500" colspan="4">No logs yet for this day.</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>

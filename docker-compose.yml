@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    image: ghcr.io/timovp/elevator-tracker:dev
+    ports:
+      - "1992:1992"
+    environment:
+      DATABASE_URL: "sqlite:////data/elevators.db"
+    volumes:
+      - ./data:/data  # <-- persistent storage on Unraid
+    restart: unless-stopped
+
