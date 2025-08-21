@@ -46,24 +46,71 @@ docker compose up --build
 * Exposes port **1992**.
 
 ---
+Totally—here’s a **drop-in Quick Start (uv)** section you can paste into the elevator app README.
 
-## Quick Start (Python locally)
+---
+
+## Quick Start (uv)
+
+Use [uv](https://github.com/astral-sh/uv) to manage the virtualenv and run the app—no manual pip juggling.
+
+### 1) Install uv (one time)
+
+**macOS/Linux**
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r <(python - <<'PY'
-import tomllib, sys, json
-data=tomllib.load(open("pyproject.toml","rb"))
-print("\n".join(data["project"]["dependencies"]))
-PY
-)
-# or: pip install fastapi uvicorn[standard] sqlmodel jinja2 python-multipart
-
-export DATABASE_URL="sqlite:///elevators.db"  # local file in repo dir
-uvicorn main:app --reload --port 1992
-# http://127.0.0.1:1992
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# then restart your shell or: source ~/.profile
 ```
+
+**Windows (PowerShell)**
+
+```powershell
+iwr https://astral.sh/uv/install.ps1 -UseBasicParsing | iex
+```
+
+### 2) Sync deps
+
+In the repo root:
+
+```bash
+uv sync          # creates .venv and installs from pyproject / uv.lock
+# (optional) if you want to pin a lockfile:
+# uv lock
+# uv sync --locked
+```
+
+### 3) Configure a local DB path (recommended)
+
+For local runs (not Docker), point SQLite to a file in the project directory by setting a environment variable or using a `.env` file:
+
+**macOS/Linux**
+
+```bash
+export DATABASE_URL="sqlite:///elevators.db"
+```
+
+**Windows (PowerShell)**
+
+```powershell
+$env:DATABASE_URL = "sqlite:///elevators.db"
+```
+
+> Optional envs you can set similarly:
+>
+> * `ELEVATORS="A,B,C,D,E,F"`
+> * `MIN_FLOOR=0`
+> * `MAX_FLOOR=22`
+
+### 4) Run the dev server
+
+```bash
+uv run uvicorn main:app --reload --port 1992
+```
+
+Open: [http://127.0.0.1:1992](http://127.0.0.1:1992)
+
+That’s it—uv handles the venv automatically (no manual activation needed).
 
 ---
 
@@ -147,8 +194,7 @@ The container runs Uvicorn with `--proxy-headers`. If you put it behind Nginx/Tr
 ├─ pyproject.toml
 ├─ Dockerfile
 ├─ docker-compose.yml
-├─ .env.example
-└─ .github/workflows/docker.yml   # builds & pushes to GHCR (owner-guarded)
+└─ .env.example
 ```
 
 ---
