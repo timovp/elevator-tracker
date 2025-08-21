@@ -42,9 +42,6 @@ docker compose up --build
 * Exposes port **1992**.
 
 ---
-Totally—here’s a **drop-in Quick Start (uv)** section you can paste into the elevator app README.
-
----
 
 ## Quick Start (uv)
 
@@ -153,15 +150,6 @@ DATABASE_URL=sqlite:////data/elevators.db
 * `elevator` (str)
 * `from_floor` (int)
 * `to_floor` (int)
-
----
-
-## Reverse Proxy / HTTPS
-
-The container runs Uvicorn with `--proxy-headers`. If you put it behind Nginx/Traefik/etc.:
-
-* Forward `Host`, `X-Forwarded-Proto`, `X-Forwarded-For`.
-* Terminate TLS at the proxy as usual.
 
 ---
 
