@@ -1,29 +1,33 @@
-# Elevator Tracker
+Absolutely! Here’s a **drop-in README** with some tasteful emojis sprinkled in—keeping all your content intact while making it a bit more fun and scannable.
+
+---
+
+# 🛗 Elevator Tracker
 
 Fast, tap-friendly **FastAPI + HTMX** web app to log which **elevator (A–F by default)** was used between floors **(0–22 by default)**—designed for phone and quick one-tap entry.
 
-## Features
+## ✨ Features
 
-* **One-tap logging:** pick *From*/*To* via a **popup keypad**, then tap an elevator button.
-* **Recent log:** last 20 entries with “Undo”.
-* **Stats:** totals per elevator, **most-used elevators**, and **top routes** with **per-route elevator distribution**.
-* **Day filter:** browse any day via `?day=YYYY-MM-DD`.
-* **CSV export:** `GET /export.csv?day=YYYY-MM-DD`.
-* **SQLite** by default (Docker volume-friendly).
-* **Zero build frontend:** Tailwind via CDN, HTMX for snappy no-reload updates.
-
----
-
-## Tech Stack
-
-* **Backend:** FastAPI, SQLModel (SQLite)
-* **Frontend:** HTMX, Tailwind (CDN)
-* **Runtime:** Python 3.11+, Uvicorn
-* **Container:** uv (Astral) base image; non-root user; healthcheck
+* ✅ **One-tap logging:** pick *From*/*To* via a **popup keypad**, then tap an elevator button.
+* ⏪ **Recent log:** last 20 entries with “Undo”.
+* 📊 **Stats:** totals per elevator, **most-used elevators**, and **top routes** with **per-route elevator distribution**.
+* 📅 **Day filter:** browse any day via `?day=YYYY-MM-DD`.
+* 🧾 **CSV export:** `GET /export.csv?day=YYYY-MM-DD`.
+* 💾 **SQLite** by default (Docker volume-friendly).
+* ⚡ **Zero build frontend:** Tailwind via CDN, HTMX for snappy no-reload updates.
 
 ---
 
-## Quick Start (Docker)
+## 🧰 Tech Stack
+
+* 🧠 **Backend:** FastAPI, SQLModel (SQLite)
+* 🎨 **Frontend:** HTMX, Tailwind (CDN)
+* 🐍 **Runtime:** Python 3.11+, Uvicorn
+* 🐳 **Container:** uv (Astral) base image; non-root user; healthcheck
+
+---
+
+## 🐳 Quick Start (Docker)
 
 ```bash
 # 1) Copy and edit env (optional)
@@ -38,12 +42,12 @@ docker compose up --build
 
 ### `docker-compose.yml` (included)
 
-* Maps `./data` → `/data` for **persistent SQLite** (`/data/elevators.db`).
-* Exposes port **1992**.
+* 💽 Maps `./data` → `/data` for **persistent SQLite** (`/data/elevators.db`).
+* 🔌 Exposes port **1992**.
 
 ---
 
-## Quick Start (uv)
+## ⚙️ Quick Start (uv)
 
 Use [uv](https://github.com/astral-sh/uv) to manage the virtualenv and run the app—no manual pip juggling.
 
@@ -75,7 +79,7 @@ uv sync          # creates .venv and installs from pyproject / uv.lock
 
 ### 3) Configure a local DB path (recommended)
 
-For local runs (not Docker), point SQLite to a file in the project directory by setting a environment variable or using a `.env` file:
+For local runs (not Docker), point SQLite to a file in the project directory by setting an environment variable or using a `.env` file:
 
 **macOS/Linux**
 
@@ -107,7 +111,7 @@ That’s it—uv handles the venv automatically (no manual activation needed).
 
 ---
 
-## Configuration
+## 🔧 Configuration
 
 All via environment variables (see `.env.example`):
 
@@ -130,7 +134,7 @@ DATABASE_URL=sqlite:////data/elevators.db
 
 ---
 
-## Endpoints
+## 🔌 Endpoints
 
 * `GET /` — main UI (optional `?day=YYYY-MM-DD`)
 * `POST /log` — create usage (form: `elevator`, `from_floor`, `to_floor`, `day?`)
@@ -140,7 +144,7 @@ DATABASE_URL=sqlite:////data/elevators.db
 
 ---
 
-## Data Model
+## 🧱 Data Model
 
 `ElevatorUsage`
 
@@ -153,7 +157,7 @@ DATABASE_URL=sqlite:////data/elevators.db
 
 ---
 
-## Persistence
+## 💾 Persistence
 
 * Docker maps `./data` → `/data` (bind mount) so your SQLite file survives updates.
 * On some hosts you may need to adjust permissions (container uses a non-root user). If you run into write errors:
@@ -163,7 +167,7 @@ DATABASE_URL=sqlite:////data/elevators.db
 
 ---
 
-## Project Structure
+## 🗂️ Project Structure
 
 ```
 .
@@ -183,7 +187,7 @@ DATABASE_URL=sqlite:////data/elevators.db
 
 ---
 
-## Development Notes
+## 🛠️ Development Notes
 
 * The *From*/*To* fields use a **custom keypad modal** (mobile-friendly).
 * Stats show:
@@ -194,13 +198,13 @@ DATABASE_URL=sqlite:////data/elevators.db
 
 ---
 
-## Security
+## 🔒 Security
 
 * No authentication included by default
 
 ---
 
-## License
+## 📄 License
 
 ```
 MIT License
@@ -208,7 +212,7 @@ MIT License
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 PRs and issues welcome!
 
@@ -218,7 +222,7 @@ PRs and issues welcome!
 
 ---
 
-## Troubleshooting
+## 🆘 Troubleshooting
 
 * **`sqlite3.OperationalError: unable to open database file`**
   Ensure `DATABASE_URL` uses an **absolute** path in Docker (`sqlite:////data/elevators.db`) and the host `./data` dir is writable by the container user.
