@@ -1,7 +1,3 @@
-Here’s a clean, ready-to-drop **README.md** for the **elevator app** repo.
-
----
-
 # Elevator Tracker
 
 Fast, tap-friendly **FastAPI + HTMX** web app to log which **elevator (A–F by default)** was used between floors **(0–22 by default)**—designed for phone and quick one-tap entry.
