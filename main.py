@@ -131,6 +131,12 @@ def compute_stats(rows: List[ElevatorUsage]) -> Dict:
     }
 
 
+def compute_all_stats(session: Session) -> Dict:
+    """Return compute_stats() over ALL rows (no day filter)."""
+    rows_all = session.exec(select(ElevatorUsage)).all()
+    return compute_stats(rows_all)
+
+
 # ---------- Routes ----------
 @app.get("/", response_class=HTMLResponse)
 def home(
@@ -142,19 +148,24 @@ def home(
         .where(ElevatorUsage.day == target_day)
         .order_by(ElevatorUsage.ts.desc())
     )
-    recent = session.exec(stmt).all()
-    stats = compute_stats(recent)
+    recent = session.exec(
+        select(ElevatorUsage)
+        .where(ElevatorUsage.day == target_day)
+        .order_by(ElevatorUsage.ts.desc())
+    ).all()
+    stats = compute_all_stats(session)  # <-- all-time, not filtered
+
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "elevators": ELEVATORS,
             "floors": floors(),
-            "min_floor": MIN_FLOOR,  # <-- pass to template
-            "max_floor": MAX_FLOOR,  # <-- pass to template
+            "min_floor": MIN_FLOOR,
+            "max_floor": MAX_FLOOR,
             "target_day": target_day,
             "recent": recent[:20],
-            "stats": stats,
+            "stats": stats,  # <-- all-time
             "error": None,
         },
     )
@@ -180,20 +191,22 @@ def log_usage(
     session.commit()
     session.refresh(usage)
 
-    rows = session.exec(
+    rows_day = session.exec(
         select(ElevatorUsage)
         .where(ElevatorUsage.day == target_day)
         .order_by(ElevatorUsage.ts.desc())
     ).all()
-    stats = compute_stats(rows)
+
+    stats = compute_all_stats(session)  # <-- all-time
 
     return templates.TemplateResponse(
         "_oob_update.html",
         {
             "request": request,
             "target_day": target_day,
-            "recent": rows[:20],
-            "stats": stats,
+            "recent": rows_day[:20],
+            "stats": stats,  # <-- all-time
+            "elevators": ELEVATORS,  # keep _stats.html happy
             "error": None,
         },
     )
@@ -212,19 +225,22 @@ def delete_usage(
         session.delete(row)
         session.commit()
 
-    rows = session.exec(
+    rows_day = session.exec(
         select(ElevatorUsage)
         .where(ElevatorUsage.day == target_day)
         .order_by(ElevatorUsage.ts.desc())
     ).all()
-    stats = compute_stats(rows)
+
+    stats = compute_all_stats(session)  # <-- all-time
+
     return templates.TemplateResponse(
         "_oob_update.html",
         {
             "request": request,
             "target_day": target_day,
-            "recent": rows[:20],
-            "stats": stats,
+            "recent": rows_day[:20],
+            "stats": stats,  # <-- all-time
+            "elevators": ELEVATORS,
             "error": None,
         },
     )
